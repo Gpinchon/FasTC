@@ -15,6 +15,9 @@
 # Please send all BUG REPORTS to <pavel@cs.unc.edu>.
 # <http://gamma.cs.unc.edu/FasTC/>
 
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Fetch_ZLib.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Fetch_PNG.cmake)
+
 SET( SOURCES
 	"src/ImageWriter.cpp"
 	"src/ImageLoader.cpp"
@@ -113,6 +116,9 @@ INSTALL(
 
 TARGET_LINK_LIBRARIES( FasTCIO FasTCBase )
 TARGET_LINK_LIBRARIES( FasTCIO FasTCCore )
+
+Fetch_ZLib()
+Fetch_PNG()
 
 IF( PNG_FOUND )
   TARGET_LINK_LIBRARIES( FasTCIO ${PNG_LIBRARY} )
