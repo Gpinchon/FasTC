@@ -21,75 +21,72 @@
 #include "FasTC/CompressedImage.h"
 #include "FasTC/CompressionJob.h"
 
-#include <iosfwd>
 #include "FasTC/ImageFwd.h"
+#include <iosfwd>
 
 // Forward declarations
 class ImageFile;
 
 struct SCompressionSettings {
-  SCompressionSettings(); // defaults
+    // The compression format for the image.
+    FasTC::ECompressionFormat format = FasTC::ECompressionFormat::eCompressionFormat_BPTC;
 
-  // The compression format for the image.
-  FasTC::ECompressionFormat format; 
+    // The flag that requests us to use SIMD, if it is available
+    bool bUseSIMD = false;
 
-  // The flag that requests us to use SIMD, if it is available
-  bool bUseSIMD;
+    // The number of threads to spawn in order to process the data
+    int iNumThreads = 1;
 
-  // The number of threads to spawn in order to process the data
-  int iNumThreads;
+    // Some compression formats take a measurement of quality when
+    // compressing an image. If the format supports it, this value
+    // will be used for quality purposes.
+    int iQuality = 50;
 
-  // Some compression formats take a measurement of quality when
-  // compressing an image. If the format supports it, this value 
-  // will be used for quality purposes.
-  int iQuality;
+    // The number of compressions to perform. The program will compress
+    // the image this many times, and then take the average of the timing.
+    int iNumCompressions = 1;
 
-  // The number of compressions to perform. The program will compress
-  // the image this many times, and then take the average of the timing.
-  int iNumCompressions;
+    // This setting measures the number of blocks that a thread
+    // will process at any given time. If this value is zero,
+    // which is the default, the work will be divided by the
+    // number of threads, and each thread will do it's job and
+    // exit.
+    int iJobSize = 0;
 
-  // This setting measures the number of blocks that a thread
-  // will process at any given time. If this value is zero, 
-  // which is the default, the work will be divided by the
-  // number of threads, and each thread will do it's job and 
-  // exit.
-  int iJobSize; 
+    // This flags instructs the compression routine to be launched in succession
+    // with many threads at once. Atomic expressions based on the availability
+    // in the platform and compiler will provide synchronization.
+    bool bUseAtomics = false;
 
-  // This flags instructs the compression routine to be launched in succession
-  // with many threads at once. Atomic expressions based on the availability
-  // in the platform and compiler will provide synchronization.
-  bool bUseAtomics;
+    // This flag instructs the infrastructure to use the compression routine from
+    // PVRTexLib. If no such lib is found during configuration then this flag is
+    // ignored. The quality being used is the fastest compression quality.
+    bool bUsePVRTexLib = false;
 
-  // This flag instructs the infrastructure to use the compression routine from
-  // PVRTexLib. If no such lib is found during configuration then this flag is
-  // ignored. The quality being used is the fastest compression quality.
-  bool bUsePVRTexLib;
+    // This flag instructs the infrastructure to use the compression routine from
+    // NVidia Texture Tools. If no such lib is found during configuration then this
+    // flag is ignored.
+    bool bUseNVTT = false;
 
-  // This flag instructs the infrastructure to use the compression routine from
-  // NVidia Texture Tools. If no such lib is found during configuration then this
-  // flag is ignored.
-  bool bUseNVTT;
-
-  // This is the output stream with which we should output the logs for the
-  // compression functions.
-  std::ostream *logStream;
+    // This is the output stream with which we should output the logs for the
+    // compression functions.
+    std::ostream* logStream = nullptr;
 };
 
-template<typename PixelType>
-extern CompressedImage *CompressImage(FasTC::Image<PixelType> *img, const SCompressionSettings &settings);
+template <typename PixelType>
+extern CompressedImage* CompressImage(FasTC::Image<PixelType>* img, const SCompressionSettings& settings);
 
 extern bool CompressImageData(
-  const unsigned char *data,
-  const unsigned int width,
-  const unsigned int height,
-  unsigned char *cmpData,
-  const unsigned int cmpDataSz,
-  const SCompressionSettings &settings
-);
+    const uint8* data,
+    const uint32 width,
+    const uint32 height,
+    uint8* compressedData,
+    const uint32 cmpDataSz,
+    const SCompressionSettings& settings);
 
-// This function computes the Peak Signal to Noise Ratio between a 
+// This function computes the Peak Signal to Noise Ratio between a
 // compressed image and a raw image.
-extern double ComputePSNR(const CompressedImage &ci, const ImageFile &file);
+extern double ComputePSNR(const CompressedImage& ci, const ImageFile& file);
 
 // This is a multi-platform yield function that preempts the current thread
 // based on the threading library that we're using.
