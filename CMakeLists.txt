@@ -139,16 +139,20 @@ INSTALL(
 ##
 ######################################################################
 
-ENABLE_TESTING()
+SET(FasTC_TESTS TRUE CACHE BOOL "Enable tests?")
 
-IF(MSVC)
-  SET(gtest_force_shared_crt TRUE CACHE BOOL "Used to properly select MSVC runtime libraries" FORCE)
-ENDIF(MSVC)
+if (FasTC_TESTS)
+  include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Fetch_GoogleTest.cmake)
+  Fetch_GoogleTest()
+  ENABLE_TESTING()
+  IF(MSVC)
+    SET(gtest_force_shared_crt TRUE CACHE BOOL "Used to properly select MSVC runtime libraries" FORCE)
+  ENDIF(MSVC)
 
-ADD_SUBDIRECTORY(GTest)
-FOREACH(DIR ${FASTC_DIRECTORIES})
-  SET(TESTDIR ${FasTC_SOURCE_DIR}/${DIR}/test)
-  IF(IS_DIRECTORY ${TESTDIR})
-    ADD_SUBDIRECTORY(${TESTDIR})
-  ENDIF()
-ENDFOREACH()
+  FOREACH(DIR ${FASTC_DIRECTORIES})
+    SET(TESTDIR ${FasTC_SOURCE_DIR}/${DIR}/test)
+    IF(IS_DIRECTORY ${TESTDIR})
+      ADD_SUBDIRECTORY(${TESTDIR})
+    ENDIF()
+  ENDFOREACH()
+endif (FasTC_TESTS)
