@@ -22,33 +22,27 @@
 
 namespace FasTC {
 
-  template<typename T>
-  class ScopedAllocator {
-   private:
-    T *m_Ptr;
-    ScopedAllocator() : m_Ptr(NULL) { }
-   public:
-    ScopedAllocator<T>(uint32 nBytes) : m_Ptr(new T[nBytes]) { }
-    ~ScopedAllocator() {
-      if(m_Ptr) {
-        delete [] m_Ptr;
-        m_Ptr = NULL;
-      }
+template <typename T> class ScopedAllocator {
+private:
+  T *m_Ptr;
+  ScopedAllocator() : m_Ptr(NULL) {}
+
+public:
+  ScopedAllocator(uint32 nBytes) : m_Ptr(new T[nBytes]) {}
+  ~ScopedAllocator() {
+    if (m_Ptr) {
+      delete[] m_Ptr;
+      m_Ptr = NULL;
     }
+  }
 
-    T &operator[](uint32 idx) {
-      return m_Ptr[idx];
-    }
+  T &operator[](uint32 idx) { return m_Ptr[idx]; }
 
-    operator T *() {
-      return m_Ptr;
-    }
+  operator T *() { return m_Ptr; }
 
-    operator bool() {
-      return m_Ptr != NULL;
-    }
-  };
+  operator bool() { return m_Ptr != NULL; }
+};
 
-}  // namespace FasTC
+} // namespace FasTC
 
-#endif  // BASE_INCLUDE_SCOPEDALLOCATOR_H_
+#endif // BASE_INCLUDE_SCOPEDALLOCATOR_H_
