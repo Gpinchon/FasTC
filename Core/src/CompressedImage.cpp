@@ -101,17 +101,17 @@ void CompressedImage::ComputePixels()
 {
 
     uint32 unCompSz = GetWidth() * GetHeight() * 4;
-    uint8* unCompBuf = new uint8[unCompSz];
-    DecompressImage(unCompBuf, unCompSz);
+    std::vector<uint8> unCompBuf(unCompSz);
+    DecompressImage(unCompBuf.data(), unCompSz);
 
-    uint32* newPixelBuf = reinterpret_cast<uint32*>(unCompBuf);
+    uint32* newPixelBuf = reinterpret_cast<uint32*>(unCompBuf.data());
 
-    FasTC::Pixel* newPixels = new FasTC::Pixel[GetWidth() * GetHeight()];
+    std::vector<FasTC::Pixel> newPixels(GetWidth() * GetHeight());
     for (uint32 i = 0; i < GetWidth() * GetHeight(); i++) {
         newPixels[i].Unpack(newPixelBuf[i]);
     }
 
-    SetImageData(GetWidth(), GetHeight(), newPixels);
+    SetImageData(GetWidth(), GetHeight(), newPixels.data());
 }
 
 uint32 CompressedImage::GetCompressedSize(uint32 width, uint32 height, ECompressionFormat format)
