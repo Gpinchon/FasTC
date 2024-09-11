@@ -18,64 +18,73 @@
 #ifndef FASTC_BASE_INCLUDE_IMAGE_H_
 #define FASTC_BASE_INCLUDE_IMAGE_H_
 
-#include "FasTC/TexCompTypes.h"
 #include "FasTC/ImageFwd.h"
+#include "FasTC/TexCompTypes.h"
+
+#include <vector>
 
 namespace FasTC {
 
-  class IPixel;
+class IPixel;
 
-  template<typename U, typename V>
-  extern double ComputePSNR(Image<U> *img1, Image<V> *img2);
+template <typename U, typename V>
+extern double ComputePSNR(Image<U>* img1, Image<V>* img2);
 
-  // Forward declare
-  template<typename PixelType>
-  class Image {
+// Forward declare
+template <typename PixelType>
+class Image {
 
-   public:
-    Image() : m_Width(0), m_Height(0), m_Pixels(0) { }
+public:
+    Image()
+        : m_Width(0)
+        , m_Height(0)
+        , m_Pixels(0)
+    {
+    }
     Image(uint32 width, uint32 height);
     Image(uint32 width, uint32 height,
-          const PixelType *pixels);
+        const PixelType* pixels);
     Image(uint32 width, uint32 height,
-          const uint32 *pixels);
-    Image(const Image<PixelType> &);
-    Image &operator=(const Image<PixelType> &);
+        const uint32* pixels);
+    Image(const Image<PixelType>&);
+    Image& operator=(const Image<PixelType>&);
     virtual ~Image();
 
-    virtual Image *Clone() const {
-      return new Image(*this);
+    virtual Image* Clone() const
+    {
+        return new Image(*this);
     };
 
-    PixelType &operator()(uint32 i, uint32 j);
-    const PixelType &operator()(uint32 i, uint32 j) const;
+    PixelType& operator()(uint32 i, uint32 j);
+    const PixelType& operator()(uint32 i, uint32 j) const;
 
     // Reads a buffer full of pixels and stores them in the
     // data associated with this image.
-    virtual bool ReadPixels(const uint32 *rgba);
-    const PixelType *GetPixels() const { return m_Pixels; }
+    virtual bool ReadPixels(const uint32* rgba);
+    const PixelType* GetPixels() const { return m_Pixels.data(); }
 
     uint32 GetWidth() const { return m_Width; }
     uint32 GetHeight() const { return m_Height; }
     uint32 GetNumPixels() const { return GetWidth() * GetHeight(); }
 
-    template<typename OtherPixelType>
-    void ConvertTo(Image<OtherPixelType> &other) const {
-      for(uint32 j = 0; j < other.GetHeight(); j++) {
-        for(uint32 i = 0; i < other.GetWidth(); i++) {
-          other(i, j).Unpack((*this)(i, j).Pack());
+    template <typename OtherPixelType>
+    void ConvertTo(Image<OtherPixelType>& other) const
+    {
+        for (uint32 j = 0; j < other.GetHeight(); j++) {
+            for (uint32 i = 0; i < other.GetWidth(); i++) {
+                other(i, j).Unpack((*this)(i, j).Pack());
+            }
         }
-      }
     }
 
-    double ComputePSNR(Image<PixelType> *other);
-    double ComputeSSIM(Image<PixelType> *other);
+    double ComputePSNR(Image<PixelType>* other);
+    double ComputeSSIM(Image<PixelType>* other);
 
-    Image<PixelType> Diff(Image<PixelType> *other, float mult);
+    Image<PixelType> Diff(Image<PixelType>* other, float mult);
 
     double ComputeEntropy();
     double ComputeMeanLocalEntropy();
-    
+
     // Function to allow derived classes to populate the pixel array.
     // This may involve decompressing a compressed image or otherwise
     // processing some data in order to populate the m_Pixels pointer.
@@ -86,29 +95,28 @@ namespace FasTC {
     // Filters the image with a given set of kernel values. The values
     // are normalized before they are used (i.e. we make sure that they
     // sum up to one).
-    void Filter(const Image<IPixel> &kernel);
+    void Filter(const Image<IPixel>& kernel);
 
-   private:
+private:
     uint32 m_Width;
     uint32 m_Height;
 
-    PixelType *m_Pixels;
+    std::vector<PixelType> m_Pixels;
 
-   protected:
+protected:
+    void SetImageData(uint32 width, uint32 height, PixelType* data);
+};
 
-    void SetImageData(uint32 width, uint32 height, PixelType *data);
-  };
+extern void GenerateGaussianKernel(Image<IPixel>& out, uint32 size, float sigma);
 
-  extern void GenerateGaussianKernel(Image<IPixel> &out, uint32 size, float sigma);
+template <typename PixelType>
+extern void SplitChannels(const Image<PixelType>& in,
+    Image<IPixel>* channelOne,
+    Image<IPixel>* channelTwo,
+    Image<IPixel>* channelThree);
 
-  template <typename PixelType>
-  extern void SplitChannels(const Image<PixelType> &in,
-                            Image<IPixel> *channelOne,
-                            Image<IPixel> *channelTwo,
-                            Image<IPixel> *channelThree);
-
-  extern void DiscreteCosineXForm(Image<IPixel> *img, uint32 blockSize);
-  extern void InvDiscreteCosineXForm(Image<IPixel> *img, uint32 blockSize);
-}  // namespace FasTC
+extern void DiscreteCosineXForm(Image<IPixel>* img, uint32 blockSize);
+extern void InvDiscreteCosineXForm(Image<IPixel>* img, uint32 blockSize);
+} // namespace FasTC
 
 #endif // __TEXCOMP_IMAGE_H__

@@ -17,59 +17,59 @@
 
 #include "FasTC/TexCompTypes.h"
 
+#include <vector>
+
 enum BPTCParallelStage {
-  eParallelStage_Uniform,
-  eParallelStage_Partitioned,
-  eParallelStage_Normal,
-  
-  kNumParallelStages
+    eParallelStage_Uniform,
+    eParallelStage_Partitioned,
+    eParallelStage_Normal,
+
+    kNumParallelStages
 };
 
 class ParallelStage {
- public:
-  ParallelStage(
-    BPTCParallelStage stage,
-    const unsigned char *inbuf,
-    unsigned char *outbuf,
-    uint32 numBlocks,
-    uint32 outBlockSz = 16,
-    uint32 inBlockSz = 64
-  );
-  ParallelStage(const ParallelStage &);
-  ParallelStage &operator=(const ParallelStage &);
-  
-  ~ParallelStage();
+public:
+    ParallelStage(
+        BPTCParallelStage stage,
+        const unsigned char* inbuf,
+        unsigned char* outbuf,
+        uint32 numBlocks,
+        uint32 outBlockSz = 16,
+        uint32 inBlockSz = 64);
+    ParallelStage(const ParallelStage&);
+    ParallelStage& operator=(const ParallelStage&);
 
-  const BPTCParallelStage m_Stage;
+    ~ParallelStage();
 
-  // Adds the block number to the list of blocks for this parallel stage
-  void AddBlock(uint32 blockNum);
+    const BPTCParallelStage m_Stage;
 
-  // Loads the desired number of blocks into the destination buffer. Returns
-  // the number of blocks loaded.
-  uint32 LoadBlocks(uint32 blockOffset, uint32 numBlocks, unsigned char *dst);
+    // Adds the block number to the list of blocks for this parallel stage
+    void AddBlock(uint32 blockNum);
 
-  // Writes the block data from src into numBlocks blocks starting from
-  // the block given by blockOffset.
-  bool WriteBlocks(uint32 blockOffset, uint32 numBlocks, const unsigned char *src);
+    // Loads the desired number of blocks into the destination buffer. Returns
+    // the number of blocks loaded.
+    uint32 LoadBlocks(uint32 blockOffset, uint32 numBlocks, unsigned char* dst);
 
- private:
+    // Writes the block data from src into numBlocks blocks starting from
+    // the block given by blockOffset.
+    bool WriteBlocks(uint32 blockOffset, uint32 numBlocks, const unsigned char* src);
 
-  // This is the stream of data that will be used to read the block data.
-  const unsigned char *const m_InBuf;
+private:
+    // This is the stream of data that will be used to read the block data.
+    const unsigned char* const m_InBuf;
 
-  // This is the destination buffer to which the block data will be written to.
-  unsigned char *const m_OutBuf;
+    // This is the destination buffer to which the block data will be written to.
+    unsigned char* const m_OutBuf;
 
-  // This is the array of block offsets that belong to this stage.
-  uint32 *m_Blocks;
+    // This is the array of block offsets that belong to this stage.
+    std::vector<uint32> m_Blocks;
 
-  // This is the total number of blocks in the given image.
-  const uint32 m_TotalNumBlocks;
+    // This is the total number of blocks in the given image.
+    const uint32 m_TotalNumBlocks;
 
-  // This is the total number of blocks in this particular stage.
-  uint32 m_NumBlocks;
+    // This is the total number of blocks in this particular stage.
+    uint32 m_NumBlocks;
 
-  const uint32 m_OutBlockSz;
-  const uint32 m_InBlockSz;
+    const uint32 m_OutBlockSz;
+    const uint32 m_InBlockSz;
 };

@@ -18,57 +18,61 @@
 #ifndef _COMPRESSED_IMAGE_H_
 #define _COMPRESSED_IMAGE_H_
 
-#include "FasTC/TexCompTypes.h"
 #include "FasTC/CompressionFormat.h"
 #include "FasTC/Image.h"
+#include "FasTC/TexCompTypes.h"
+
+#include <vector>
 
 class CompressedImage : public FasTC::Image<FasTC::Pixel> {
- private:
-  FasTC::ECompressionFormat m_Format;
-  uint8 *m_CompressedData;
+private:
+    FasTC::ECompressionFormat m_Format;
+    std::vector<uint8> m_CompressedData;
 
-  typedef FasTC::Image<FasTC::Pixel> UncompressedImage;
+    typedef FasTC::Image<FasTC::Pixel> UncompressedImage;
 
- public:
-  CompressedImage(const CompressedImage &);
-  CompressedImage &operator=(const CompressedImage &);
+public:
+    CompressedImage(const CompressedImage&);
+    CompressedImage& operator=(const CompressedImage&);
 
-  // Create a compressed image from the given data according to
-  // the passed format. The size of the data is expected to conform
-  // to the width, height, and format specified.
-  CompressedImage(
-    const uint32 width,
-    const uint32 height,
-    const FasTC::ECompressionFormat format,
-    const uint8 *data
-  );
+    // Create a compressed image from the given data according to
+    // the passed format. The size of the data is expected to conform
+    // to the width, height, and format specified.
+    CompressedImage(
+        const uint32 width,
+        const uint32 height,
+        const FasTC::ECompressionFormat format,
+        const uint8* data);
 
-  virtual ~CompressedImage();
+    virtual ~CompressedImage();
 
-  virtual FasTC::Image<FasTC::Pixel> *Clone() const {
-    return new CompressedImage(*this);
-  }
+    virtual FasTC::Image<FasTC::Pixel>* Clone() const
+    {
+        return new CompressedImage(*this);
+    }
 
-  virtual void ComputePixels();
+    virtual void ComputePixels();
 
-  static uint32 GetCompressedSize(uint32 width, uint32 height, FasTC::ECompressionFormat format);
+    static uint32 GetCompressedSize(uint32 width, uint32 height, FasTC::ECompressionFormat format);
 
-  uint32 GetCompressedSize() const {
-    return GetCompressedSize(GetWidth(), GetHeight(), m_Format);
-  }
-  uint32 GetUncompressedSize() const {
-    return GetWidth() * GetHeight() * sizeof(uint32);
-  }
+    uint32 GetCompressedSize() const
+    {
+        return GetCompressedSize(GetWidth(), GetHeight(), m_Format);
+    }
+    uint32 GetUncompressedSize() const
+    {
+        return GetWidth() * GetHeight() * sizeof(uint32);
+    }
 
-  // Decompress the compressed image data into outBuf. outBufSz is expected
-  // to be the proper size determined by the width, height, and format.
-  // !FIXME! We should have a function to explicitly return the in/out buf
-  // size for a given compressed image.
-  bool DecompressImage(uint8 *outBuf, uint32 outBufSz) const;
+    // Decompress the compressed image data into outBuf. outBufSz is expected
+    // to be the proper size determined by the width, height, and format.
+    // !FIXME! We should have a function to explicitly return the in/out buf
+    // size for a given compressed image.
+    bool DecompressImage(uint8* outBuf, uint32 outBufSz) const;
 
-  const uint8 *GetCompressedData() const { return m_CompressedData; }
+    const uint8* GetCompressedData() const { return m_CompressedData.data(); }
 
-  FasTC::ECompressionFormat GetFormat() const { return m_Format; }
+    FasTC::ECompressionFormat GetFormat() const { return m_Format; }
 };
 
 #endif // _COMPRESSED_IMAGE_H_

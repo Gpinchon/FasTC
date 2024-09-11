@@ -60,7 +60,6 @@ SET( LIBRARY_HEADERS
   "include/FasTC/MatrixSquare.h"
   "include/FasTC/Matrix3x3.h"
   "include/FasTC/Matrix4x4.h"
-  "include/FasTC/ScopedAllocator.h"
   "include/FasTC/VectorBase.h"
   "include/FasTC/Vector2.h"
   "include/FasTC/Vector3.h"
