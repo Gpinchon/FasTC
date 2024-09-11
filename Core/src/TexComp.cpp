@@ -384,8 +384,7 @@ CompressedImage* CompressImage(
         height = newHeight;
     }
 
-    uint32* data = new uint32[width * height];
-    memset(data, 0, width * height * sizeof(data[0]));
+    std::vector<uint32> data(width * height, 0);
 
     CompressedImage* outImg = NULL;
 
@@ -400,14 +399,12 @@ CompressedImage* CompressImage(
         }
     }
 
-    unsigned char* cmpData = new unsigned char[cmpDataSz];
-    uint8* dataPtr = reinterpret_cast<uint8*>(data);
-    if (CompressImageData(dataPtr, width, height, cmpData, cmpDataSz, settings)) {
-        outImg = new CompressedImage(width, height, settings.format, cmpData);
+    std::vector<uint8> cmpData(cmpDataSz);
+    uint8* dataPtr = reinterpret_cast<uint8*>(data.data());
+    if (CompressImageData(dataPtr, width, height, cmpData.data(), cmpDataSz, settings)) {
+        outImg = new CompressedImage(width, height, settings.format, cmpData.data());
     }
 
-    delete[] data;
-    delete[] cmpData;
     return outImg;
 }
 
