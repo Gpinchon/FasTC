@@ -22,28 +22,30 @@
 #include "FasTC/ImageFwd.h"
 #include "FasTC/ImageFileFormat.h"
 
+#include <vector>
+
 class ImageLoader {
 
  protected:
 
   const uint8 *const m_RawData;
   const uint32 m_NumRawDataBytes;
-  uint8 *m_PixelData;
+  std::vector<uint8> m_PixelData;
 
   uint32 m_Width;
   uint32 m_Height;
 
   uint32 m_RedChannelPrecision;
-  uint8 *m_RedData;
+  std::vector<uint8> m_RedData;
 
   uint32 m_GreenChannelPrecision;
-  uint8 *m_GreenData;
+  std::vector<uint8> m_GreenData;
   
   uint32 m_BlueChannelPrecision;
-  uint8 *m_BlueData;
+  std::vector<uint8> m_BlueData;
  
   uint32 m_AlphaChannelPrecision;
-  uint8 *m_AlphaData;
+  std::vector<uint8> m_AlphaData;
 
   ImageLoader(const uint8 *rawData) 
   : m_RawData(rawData)
@@ -72,53 +74,28 @@ class ImageLoader {
   bool LoadFromPixelBuffer(const uint32 *data, bool flipY = false);
 
  public:
-  virtual ~ImageLoader() {
-    if(m_RedData) {
-      delete [] m_RedData;
-      m_RedData = 0;
-    }
-
-    if(m_GreenData) {
-      delete [] m_GreenData;
-      m_GreenData = 0;
-    }
-
-    if(m_BlueData) {
-      delete [] m_BlueData;
-      m_BlueData = 0;
-    }
-
-    if(m_AlphaData) {
-      delete [] m_AlphaData;
-      m_AlphaData = 0;
-    }
-    
-    if(m_PixelData) {
-      delete [] m_PixelData;
-      m_PixelData = 0;
-    }
-  }
+  virtual ~ImageLoader() {}
 
   virtual bool ReadData() = 0;
 
   uint32 GetRedChannelPrecision() const { return m_RedChannelPrecision; }
-  const uint8 * GetRedPixelData() const { return m_RedData; }
+  const uint8 * GetRedPixelData() const { return m_RedData.data(); }
 
   uint32 GetGreenChannelPrecision() const { return m_GreenChannelPrecision; }
-  const uint8 * GetGreenPixelData() const { return m_GreenData; }
+  const uint8 * GetGreenPixelData() const { return m_GreenData.data(); }
 
   uint32 GetBlueChannelPrecision() const { return m_BlueChannelPrecision; }
-  const uint8 * GetBluePixelData() const { return m_BlueData; }
+  const uint8 * GetBluePixelData() const { return m_BlueData.data(); }
 
   uint32 GetAlphaChannelPrecision() const { return m_AlphaChannelPrecision; }
-  const uint8 * GetAlphaPixelData() const { return m_AlphaData; }
+  const uint8 * GetAlphaPixelData() const { return m_AlphaData.data(); }
 
   uint32 GetWidth() const { return m_Width; }
   uint32 GetHeight() const { return m_Height; }
   uint32 GetImageDataSz() const { return m_Width * m_Height * 4; }
 
   virtual FasTC::Image<> *LoadImage();
-  const uint8 *GetImageData() const { return m_PixelData; }
+  const uint8 *GetImageData() const { return m_PixelData.data(); }
 };
 
 #ifndef PNG_FOUND

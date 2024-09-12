@@ -162,7 +162,7 @@ bool ImageFile::Write()
         return false;
     }
 
-    WriteImageDataToFile(writer->GetRawFileData().data(), uint32(writer->GetRawFileDataSz()), m_Filename);
+    WriteImageDataToFile(writer->GetRawFileData(), uint32(writer->GetRawFileDataSz()), m_Filename);
 
     delete writer;
     return true;

@@ -21,6 +21,8 @@
 #include "FasTC/TexCompTypes.h"
 #include "FasTC/ImageFileFormat.h"
 
+#include <vector>
+
 namespace FasTC {
   class Pixel;
 }
@@ -30,7 +32,6 @@ class ImageWriter {
  protected:
 
   const FasTC::Pixel *m_Pixels;
-  uint32 m_RawFileDataSz;
   std::vector<uint8> m_RawFileData;
   
   uint32 m_Width;
@@ -38,8 +39,7 @@ class ImageWriter {
 
   ImageWriter(const int width, const int height, const FasTC::Pixel *rawData) 
   : m_Pixels(rawData)
-  , m_RawFileDataSz(256)
-  , m_RawFileData(m_RawFileDataSz)
+  , m_RawFileData(256)
   , m_Width(width), m_Height(height)
     { }
 
@@ -51,8 +51,8 @@ class ImageWriter {
   uint32 GetWidth() const { return m_Width; }
   uint32 GetHeight() const { return m_Height; }
   uint32 GetImageDataSz() const { return m_Width * m_Height * sizeof(uint32); }
-  uint32 GetRawFileDataSz() const { return m_RawFileDataSz; }
-  uint8 *GetRawFileData() const { return m_RawFileData.data(); }
+  uint32 GetRawFileDataSz() const { return m_RawFileData.size(); }
+  const uint8* GetRawFileData() const { return m_RawFileData.data(); }
   virtual bool WriteImage() = 0;
 };
 
