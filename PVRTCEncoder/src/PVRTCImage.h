@@ -18,8 +18,8 @@
 #ifndef PVRTCENCODER_SRC_IMAGE_H_
 #define PVRTCENCODER_SRC_IMAGE_H_
 
-#include "FasTC/TexCompTypes.h"
 #include "FasTC/Image.h"
+#include "FasTC/TexCompTypes.h"
 
 #include "FasTC/PVRTCCompressor.h"
 
@@ -27,49 +27,49 @@
 
 // Forward include
 namespace FasTC {
-  class Pixel;
+class Pixel;
 }
 
 namespace PVRTCC {
 
 class Image : public FasTC::Image<FasTC::Pixel> {
- public:
-  Image(uint32 width, uint32 height);
-  Image(uint32 width, uint32 height, const FasTC::Pixel *pixels);
-  Image(const Image &);
-  Image &operator=(const Image &);
-  virtual ~Image();
-  void BilinearUpscale(uint32 xtimes, uint32 ytimes,
-                       EWrapMode wrapMode = eWrapMode_Wrap);
+public:
+    Image(uint32 width, uint32 height);
+    Image(uint32 width, uint32 height, const FasTC::Pixel* pixels);
+    Image(const Image&);
+    Image& operator=(const Image&);
+    virtual ~Image();
+    void BilinearUpscale(uint32 xtimes, uint32 ytimes,
+        EWrapMode wrapMode = eWrapMode_Wrap);
 
-  // Downscales the image by taking an anisotropic diffusion approach
-  // with respect to the gradient of the intensity. In this way, we can
-  // preserve the most important image structures by not blurring across
-  // edge boundaries, which when upscaled will retain the structural
-  // image quality...
-  void ContentAwareDownscale(uint32 xtimes, uint32 ytimes,
-                             EWrapMode wrapMode = eWrapMode_Wrap,
-                             bool bOffsetNewPixels = false);
+    // Downscales the image by taking an anisotropic diffusion approach
+    // with respect to the gradient of the intensity. In this way, we can
+    // preserve the most important image structures by not blurring across
+    // edge boundaries, which when upscaled will retain the structural
+    // image quality...
+    void ContentAwareDownscale(uint32 xtimes, uint32 ytimes,
+        EWrapMode wrapMode = eWrapMode_Wrap,
+        bool bOffsetNewPixels = false);
 
-  // Downscales the image by using a simple averaging of the neighboring pixel values
-  void AverageDownscale(uint32 xtimes, uint32 ytimes);
+    // Downscales the image by using a simple averaging of the neighboring pixel values
+    void AverageDownscale(uint32 xtimes, uint32 ytimes);
 
-  void ComputeHessianEigenvalues(::std::vector<float> &eigOne, 
-                                 ::std::vector<float> &eigTwo,
-                                 EWrapMode wrapMode = eWrapMode_Wrap);
+    void ComputeHessianEigenvalues(::std::vector<float>& eigOne,
+        ::std::vector<float>& eigTwo,
+        EWrapMode wrapMode = eWrapMode_Wrap);
 
-  void ChangeBitDepth(const uint8 (&depths)[4]);
+    void ChangeBitDepth(const uint8 (&depths)[4]);
 
-  void ExpandTo8888();
-  void DebugOutput(const char *filename) const;
+    void ExpandTo8888();
+    void DebugOutput(const char* filename) const;
 
- private:
-  FasTC::Pixel *m_FractionalPixels;
+private:
+    std::vector<FasTC::Pixel> m_FractionalPixels;
 
-  uint32 GetPixelIndex(int32 i, int32 j, EWrapMode wrapMode = eWrapMode_Clamp) const;
-  const FasTC::Pixel &GetPixel(int32 i, int32 j, EWrapMode wrapMode = eWrapMode_Clamp) const;
+    uint32 GetPixelIndex(int32 i, int32 j, EWrapMode wrapMode = eWrapMode_Clamp) const;
+    const FasTC::Pixel& GetPixel(int32 i, int32 j, EWrapMode wrapMode = eWrapMode_Clamp) const;
 };
 
-}  // namespace PVRTCC
+} // namespace PVRTCC
 
-#endif  // PVRTCENCODER_SRC_IMAGE_H_
+#endif // PVRTCENCODER_SRC_IMAGE_H_
