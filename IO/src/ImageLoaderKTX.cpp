@@ -117,23 +117,16 @@ ImageLoaderKTX::~ImageLoaderKTX() { }
 
 FasTC::Image<>* ImageLoaderKTX::LoadImage()
 {
-
     // Get rid of the pixel data if it exists...
-    if (m_PixelData) {
-        delete m_PixelData;
-        m_PixelData = NULL;
-    }
-
+    m_PixelData.clear();
     if (!ReadData()) {
         return NULL;
     }
-
     if (!m_bIsCompressed) {
-        uint32* pixels = reinterpret_cast<uint32*>(m_PixelData);
+        uint32* pixels = reinterpret_cast<uint32*>(m_PixelData.data());
         return new FasTC::Image<>(m_Width, m_Height, pixels);
     }
-
-    return new CompressedImage(m_Width, m_Height, m_Format, m_PixelData);
+    return new CompressedImage(m_Width, m_Height, m_Format, m_PixelData.data());
 }
 
 bool ImageLoaderKTX::ReadData()
@@ -337,8 +330,7 @@ bool ImageLoaderKTX::ReadData()
         }
 
         uint32 dataSize = CompressedImage::GetCompressedSize(pixelWidth, pixelHeight, m_Format);
-        m_PixelData = new uint8[dataSize];
-        memcpy(m_PixelData, rdr.GetData(), dataSize);
+        m_PixelData = { rdr.GetData(), rdr.GetData() + dataSize };
         rdr.Advance(dataSize);
 
         m_bIsCompressed = true;
@@ -357,8 +349,7 @@ bool ImageLoaderKTX::ReadData()
         // We should have RGBA8 data here so we can simply load it
         // as we normally would.
         uint32 pixelDataSz = m_Width * m_Height * 4;
-        m_PixelData = new uint8[pixelDataSz];
-        memcpy(m_PixelData, rdr.GetData(), pixelDataSz);
+        m_PixelData = { rdr.GetData(), rdr.GetData() + pixelDataSz };
         rdr.Advance(pixelDataSz);
     }
     return rdr.GetBytesLeft() == 0;

@@ -18,10 +18,10 @@
 #include "FasTC/ImageLoader.h"
 #include "FasTC/Image.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <limits.h>
 #include <assert.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -30,188 +30,193 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-static inline T min(const T &a, const T &b) {
-  return (a > b)? b : a;
+static inline T min(const T& a, const T& b)
+{
+    return (a > b) ? b : a;
 }
 
 template <typename T>
-static inline T abs(const T &a) {
-  return (a > 0)? a : -a;
+static inline T abs(const T& a)
+{
+    return (a > 0) ? a : -a;
 }
 
 template <typename T>
-static inline T sad(const T &a, const T &b) {
-  return (a > b)? a - b : b - a;
+static inline T sad(const T& a, const T& b)
+{
+    return (a > b) ? a - b : b - a;
 }
 
-void ReportError(const char *str) {
-  fprintf(stderr, "ImageLoader.cpp -- ERROR: %s\n", str);
+void ReportError(const char* str)
+{
+    fprintf(stderr, "ImageLoader.cpp -- ERROR: %s\n", str);
 }
 
-unsigned int ImageLoader::GetChannelForPixel(uint32 x, uint32 y, uint32 ch) {
+unsigned int ImageLoader::GetChannelForPixel(uint32 x, uint32 y, uint32 ch)
+{
 
-  // First make sure that we're in bounds...
-  if(x >= GetWidth()) {
-    return 0;
-  }
-
-  if(y >= GetHeight()) {
-    return 0;
-  }
-
-  uint32 prec = 0;
-  const uint8 *data = NULL;
-
-  switch(ch) {
-  case 0:
-    prec = GetRedChannelPrecision();
-    data = GetRedPixelData();
-    break;
-
-  case 1:
-    prec = GetGreenChannelPrecision();
-    data = GetGreenPixelData();
-    break;
-
-  case 2:
-    prec = GetBlueChannelPrecision();
-    data = GetBluePixelData();
-    break;
-
-  case 3:
-    prec = GetAlphaChannelPrecision();
-    data = GetAlphaPixelData();
-    break;
-
-  default:
-    ReportError("Unspecified channel");
-    return INT_MAX;
-  }
-
-  if(0 == prec)
-    return 0;
-
-  uint32 pixelIdx = y * GetWidth() + x;
-  const uint32 val = data[pixelIdx];
-  
-  if(prec < 8) {
-    int32 ret = 0;
-    for(uint32 precLeft = 8; precLeft > 0; precLeft -= min(prec, sad(prec, precLeft))) {
-      
-      if(prec > precLeft) {
-        const int toShift = prec - precLeft;
-        ret = ret << precLeft;
-        ret |= val >> toShift;
-      }
-      else {
-        ret = ret << prec;
-        ret |= val;
-      }
+    // First make sure that we're in bounds...
+    if (x >= GetWidth()) {
+        return 0;
     }
 
-    return static_cast<unsigned int>(ret);
-  }
-  else if(prec > 8) {
-    const int32 toShift = prec - 8;
-    return val >> toShift;
-  }
-
-  return val;
-}
-
-bool ImageLoader::LoadFromPixelBuffer(const uint32 *data, bool flipY) {
-  m_RedChannelPrecision = 8;
-  m_GreenChannelPrecision = 8;
-  m_BlueChannelPrecision = 8;
-  m_AlphaChannelPrecision = 8;
-
-  const int nPixels = m_Width * m_Height;
-  m_RedData = new uint8[nPixels];
-  m_GreenData = new uint8[nPixels];
-  m_BlueData = new uint8[nPixels];
-  m_AlphaData = new uint8[nPixels];
-
-  for (uint32 j = 0; j < m_Height; j++) {
-    for (uint32 i = 0; i < m_Width; i++) {
-      uint32 idx = j*m_Width + i;
-      uint32 pIdx = idx;
-      if(flipY)
-        idx = (m_Height - j - 1)*m_Width + i;
-      uint32 pixel = data[idx];
-      m_RedData[pIdx] = static_cast<uint8>(pixel & 0xFF);
-      m_GreenData[pIdx] = static_cast<uint8>((pixel >> 8) & 0xFF);
-      m_BlueData[pIdx] = static_cast<uint8>((pixel >> 16) & 0xFF);
-      m_AlphaData[pIdx] = static_cast<uint8>((pixel >> 24) & 0xFF);
+    if (y >= GetHeight()) {
+        return 0;
     }
-  }
 
-  return true;
+    uint32 prec = 0;
+    const uint8* data = NULL;
+
+    switch (ch) {
+    case 0:
+        prec = GetRedChannelPrecision();
+        data = GetRedPixelData();
+        break;
+
+    case 1:
+        prec = GetGreenChannelPrecision();
+        data = GetGreenPixelData();
+        break;
+
+    case 2:
+        prec = GetBlueChannelPrecision();
+        data = GetBluePixelData();
+        break;
+
+    case 3:
+        prec = GetAlphaChannelPrecision();
+        data = GetAlphaPixelData();
+        break;
+
+    default:
+        ReportError("Unspecified channel");
+        return INT_MAX;
+    }
+
+    if (0 == prec)
+        return 0;
+
+    uint32 pixelIdx = y * GetWidth() + x;
+    const uint32 val = data[pixelIdx];
+
+    if (prec < 8) {
+        int32 ret = 0;
+        for (uint32 precLeft = 8; precLeft > 0; precLeft -= min(prec, sad(prec, precLeft))) {
+
+            if (prec > precLeft) {
+                const int toShift = prec - precLeft;
+                ret = ret << precLeft;
+                ret |= val >> toShift;
+            } else {
+                ret = ret << prec;
+                ret |= val;
+            }
+        }
+
+        return static_cast<unsigned int>(ret);
+    } else if (prec > 8) {
+        const int32 toShift = prec - 8;
+        return val >> toShift;
+    }
+
+    return val;
 }
 
-FasTC::Image<> *ImageLoader::LoadImage() {
+bool ImageLoader::LoadFromPixelBuffer(const uint32* data, bool flipY)
+{
+    m_RedChannelPrecision = 8;
+    m_GreenChannelPrecision = 8;
+    m_BlueChannelPrecision = 8;
+    m_AlphaChannelPrecision = 8;
 
-  // Do we already have pixel data?
-  if(m_PixelData) {
-    uint32 *pixels = reinterpret_cast<uint32 *>(m_PixelData);
-    return new FasTC::Image<>(m_Width, m_Height, pixels);
-  }
+    const int nPixels = m_Width * m_Height;
+    m_RedData.resize(nPixels);
+    m_GreenData.resize(nPixels);
+    m_BlueData.resize(nPixels);
+    m_AlphaData.resize(nPixels);
 
-  // Read the image data!
-  if(!ReadData())
-    return NULL;
+    for (uint32 j = 0; j < m_Height; j++) {
+        for (uint32 i = 0; i < m_Width; i++) {
+            uint32 idx = j * m_Width + i;
+            uint32 pIdx = idx;
+            if (flipY)
+                idx = (m_Height - j - 1) * m_Width + i;
+            uint32 pixel = data[idx];
+            m_RedData[pIdx] = static_cast<uint8>(pixel & 0xFF);
+            m_GreenData[pIdx] = static_cast<uint8>((pixel >> 8) & 0xFF);
+            m_BlueData[pIdx] = static_cast<uint8>((pixel >> 16) & 0xFF);
+            m_AlphaData[pIdx] = static_cast<uint8>((pixel >> 24) & 0xFF);
+        }
+    }
 
-  // Create RGBA buffer 
-  const unsigned int dataSz = 4 * GetWidth() * GetHeight();
-  m_PixelData = new unsigned char[dataSz];
+    return true;
+}
 
-  int byteIdx = 0;
-  for(uint32 j = 0; j < GetHeight(); j++) {
-    for(uint32 i = 0; i < GetWidth(); i++) {
+FasTC::Image<>* ImageLoader::LoadImage()
+{
 
-      unsigned int redVal = GetChannelForPixel(i, j, 0);
-      if(redVal == INT_MAX) {
+    // Do we already have pixel data?
+    if (!m_PixelData.empty()) {
+        uint32* pixels = reinterpret_cast<uint32*>(m_PixelData.data());
+        return new FasTC::Image<>(m_Width, m_Height, pixels);
+    }
+
+    // Read the image data!
+    if (!ReadData())
         return NULL;
-      }
 
-      unsigned int greenVal = redVal;
-      unsigned int blueVal = redVal;
+    // Create RGBA buffer
+    const unsigned int dataSz = 4 * GetWidth() * GetHeight();
+    m_PixelData.resize(dataSz);
 
-      if(GetGreenChannelPrecision() > 0) {
-        greenVal = GetChannelForPixel(i, j, 1);
-        if(greenVal == INT_MAX) {
-          return NULL;
+    int byteIdx = 0;
+    for (uint32 j = 0; j < GetHeight(); j++) {
+        for (uint32 i = 0; i < GetWidth(); i++) {
+
+            unsigned int redVal = GetChannelForPixel(i, j, 0);
+            if (redVal == INT_MAX) {
+                return NULL;
+            }
+
+            unsigned int greenVal = redVal;
+            unsigned int blueVal = redVal;
+
+            if (GetGreenChannelPrecision() > 0) {
+                greenVal = GetChannelForPixel(i, j, 1);
+                if (greenVal == INT_MAX) {
+                    return NULL;
+                }
+            }
+
+            if (GetBlueChannelPrecision() > 0) {
+                blueVal = GetChannelForPixel(i, j, 2);
+                if (blueVal == INT_MAX) {
+                    return NULL;
+                }
+            }
+
+            unsigned int alphaVal = 0xFF;
+            if (GetAlphaChannelPrecision() > 0) {
+                alphaVal = GetChannelForPixel(i, j, 3);
+                if (alphaVal == INT_MAX) {
+                    return NULL;
+                }
+            }
+
+            // Red channel
+            m_PixelData[byteIdx++] = static_cast<uint8>(redVal & 0xFF);
+
+            // Green channel
+            m_PixelData[byteIdx++] = static_cast<uint8>(greenVal & 0xFF);
+
+            // Blue channel
+            m_PixelData[byteIdx++] = static_cast<uint8>(blueVal & 0xFF);
+
+            // Alpha channel
+            m_PixelData[byteIdx++] = static_cast<uint8>(alphaVal & 0xFF);
         }
-      }
-
-      if(GetBlueChannelPrecision() > 0) {
-        blueVal = GetChannelForPixel(i, j, 2);
-        if(blueVal == INT_MAX) {
-          return NULL;
-        }
-      }
-
-      unsigned int alphaVal = 0xFF;
-      if(GetAlphaChannelPrecision() > 0) {
-        alphaVal = GetChannelForPixel(i, j, 3);
-        if(alphaVal == INT_MAX) {
-          return NULL;
-        }
-      }
-
-      // Red channel
-      m_PixelData[byteIdx++] = static_cast<uint8>(redVal & 0xFF);
-
-      // Green channel
-      m_PixelData[byteIdx++] = static_cast<uint8>(greenVal & 0xFF);
-
-      // Blue channel
-      m_PixelData[byteIdx++] = static_cast<uint8>(blueVal & 0xFF);
-
-      // Alpha channel
-      m_PixelData[byteIdx++] = static_cast<uint8>(alphaVal & 0xFF);
     }
-  }
 
-  uint32 *pixels = reinterpret_cast<uint32 *>(m_PixelData);
-  return new FasTC::Image<>(m_Width, m_Height, pixels);
+    uint32* pixels = reinterpret_cast<uint32*>(m_PixelData.data());
+    return new FasTC::Image<>(m_Width, m_Height, pixels);
 }

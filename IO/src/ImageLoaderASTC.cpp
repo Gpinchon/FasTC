@@ -96,23 +96,16 @@ ImageLoaderASTC::~ImageLoaderASTC() { }
 
 FasTC::Image<>* ImageLoaderASTC::LoadImage()
 {
-
     // Get rid of the pixel data if it exists...
-    if (m_PixelData) {
-        delete m_PixelData;
-        m_PixelData = NULL;
-    }
-
+    m_PixelData.clear();
     if (!ReadData()) {
         return NULL;
     }
-
     FasTC::ECompressionFormat fmt;
     if (!GetFormatForBlockDimensions(fmt, m_BlockSizeX, m_BlockSizeY)) {
         return NULL;
     }
-
-    return new CompressedImage(m_Width, m_Height, fmt, m_PixelData);
+    return new CompressedImage(m_Width, m_Height, fmt, m_PixelData.data());
 }
 
 template <typename T>
@@ -199,7 +192,6 @@ bool ImageLoaderASTC::ReadData()
     uint32 compressedSize = CompressedImage::GetCompressedSize(pixelWidth, pixelHeight, fmt);
 
     assert(compressedSize + 16 == m_NumRawDataBytes);
-    m_PixelData = new uint8[compressedSize];
-    memcpy(m_PixelData, data, compressedSize);
+    m_PixelData = { data, data + compressedSize };
     return true;
 }
