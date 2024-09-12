@@ -31,7 +31,7 @@ class ImageWriter {
 
   const FasTC::Pixel *m_Pixels;
   uint32 m_RawFileDataSz;
-  uint8 *m_RawFileData;
+  std::vector<uint8> m_RawFileData;
   
   uint32 m_Width;
   uint32 m_Height;
@@ -39,25 +39,20 @@ class ImageWriter {
   ImageWriter(const int width, const int height, const FasTC::Pixel *rawData) 
   : m_Pixels(rawData)
   , m_RawFileDataSz(256)
-  , m_RawFileData(new uint8[m_RawFileDataSz])
+  , m_RawFileData(m_RawFileDataSz)
   , m_Width(width), m_Height(height)
     { }
 
   uint32 GetChannelForPixel(uint32 x, uint32 y, uint32 ch);
 
  public:
-  virtual ~ImageWriter() {
-    if(m_RawFileData) {
-      delete [] m_RawFileData;
-      m_RawFileData = 0;
-    }
-  }
+  virtual ~ImageWriter() {}
 
   uint32 GetWidth() const { return m_Width; }
   uint32 GetHeight() const { return m_Height; }
   uint32 GetImageDataSz() const { return m_Width * m_Height * sizeof(uint32); }
   uint32 GetRawFileDataSz() const { return m_RawFileDataSz; }
-  uint8 *GetRawFileData() const { return m_RawFileData; }
+  uint8 *GetRawFileData() const { return m_RawFileData.data(); }
   virtual bool WriteImage() = 0;
 };
 

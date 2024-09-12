@@ -15,11 +15,11 @@
 // Please send all BUG REPORTS to <pavel@cs.unc.edu>.
 // <http://gamma.cs.unc.edu/FasTC/>
 
-#ifndef _IMAGE_FILE_H_ 
-#define _IMAGE_FILE_H_ 
+#ifndef _IMAGE_FILE_H_
+#define _IMAGE_FILE_H_
 
-#include "FasTC/TexCompTypes.h"
 #include "FasTC/ImageFwd.h"
+#include "FasTC/TexCompTypes.h"
 
 #include "ImageFileFormat.h"
 
@@ -31,49 +31,47 @@ struct SCompressionSettings;
 class ImageFile {
 
 public:
+    // Opens and loads an image file from the given path. The file format
+    // is inferred from the filename.
+    ImageFile(const char* filename);
 
-  // Opens and loads an image file from the given path. The file format
-  // is inferred from the filename.
-  ImageFile(const char *filename);
+    // Opens and loads a given image file with the passed format.
+    ImageFile(const char* filename, EImageFileFormat format);
 
-  // Opens and loads a given image file with the passed format.
-  ImageFile(const char *filename, EImageFileFormat format);
+    // Creates an imagefile with the corresponding image data. This is ready
+    // to be written to disk with the passed filename.
+    ImageFile(const char* filename, EImageFileFormat format, const FasTC::Image<>&);
 
-  // Creates an imagefile with the corresponding image data. This is ready
-  // to be written to disk with the passed filename.
-  ImageFile(const char *filename, EImageFileFormat format, const FasTC::Image<> &);
+    ~ImageFile();
 
-  ~ImageFile();
+    static EImageFileFormat DetectFileFormat(const CHAR* filename);
+    unsigned int GetWidth() const { return m_Width; }
+    unsigned int GetHeight() const { return m_Height; }
+    FasTC::Image<>* GetImage() const { return m_Image; }
 
-  static EImageFileFormat DetectFileFormat(const CHAR *filename);
-  unsigned int GetWidth() const { return m_Width; }
-  unsigned int GetHeight() const { return m_Height; }
-  FasTC::Image<> *GetImage() const { return m_Image; }
+    // Loads the image into memory. If this function returns true, then a valid
+    // m_Image will be created and available.
+    bool Load();
 
-  // Loads the image into memory. If this function returns true, then a valid
-  // m_Image will be created and available.
-  bool Load();
+    // Writes the given image to disk. Returns true on success.
+    bool Write();
 
-  // Writes the given image to disk. Returns true on success.
-  bool Write();
+private:
+    static const unsigned int kMaxFilenameSz = 256;
+    char m_Filename[kMaxFilenameSz];
+    unsigned int m_Width = 0;
+    unsigned int m_Height = 0;
 
- private:
+    const EImageFileFormat m_FileFormat;
 
-  static const unsigned int kMaxFilenameSz = 256;
-  char m_Filename[kMaxFilenameSz];
-  unsigned int m_Width;
-  unsigned int m_Height;
+    uint8* m_FileData;
+    int32 m_FileDataSz;
 
-  const EImageFileFormat m_FileFormat;
+    FasTC::Image<>* m_Image;
 
-  uint8 *m_FileData;
-  int32 m_FileDataSz;
+    bool ReadFileData(const CHAR* filename);
+    static bool WriteImageDataToFile(const uint8* data, const uint32 dataSz, const CHAR* filename);
 
-  FasTC::Image<> *m_Image;
-  
-  bool ReadFileData(const CHAR *filename);
-  static bool WriteImageDataToFile(const uint8 *data, const uint32 dataSz, const CHAR *filename);
-
-  FasTC::Image<> *LoadImage() const;
+    FasTC::Image<>* LoadImage() const;
 };
-#endif // _IMAGE_FILE_H_ 
+#endif // _IMAGE_FILE_H_
