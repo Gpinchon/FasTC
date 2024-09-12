@@ -106,13 +106,12 @@ bool ImageLoaderPNG::ReadData()
 
     const int numPixels = m_Width * m_Height;
     png_size_t bpr = png_get_rowbytes(png_ptr, info_ptr);
-    png_bytep rowData = new png_byte[bpr];
+    std::vector<png_byte> rowData(bpr);
 
     switch (colorType) {
     default:
         ReportError("PNG color type unsupported");
         png_destroy_read_struct(&png_ptr, NULL, NULL);
-        delete[] rowData;
         return false;
 
     case PNG_COLOR_TYPE_PALETTE: {
@@ -135,7 +134,7 @@ bool ImageLoaderPNG::ReadData()
         }
 
         for (uint32 i = 0; i < m_Height; i++) {
-            png_read_row(png_ptr, rowData, NULL);
+            png_read_row(png_ptr, rowData.data(), NULL);
             unsigned int rowOffset = i * m_Width;
             for (uint32 j = 0; j < m_Width; j++) {
                 assert(rowData[j] < nPaletteEntries);
@@ -157,7 +156,7 @@ bool ImageLoaderPNG::ReadData()
 
         for (uint32 i = 0; i < m_Height; i++) {
 
-            png_read_row(png_ptr, rowData, NULL);
+            png_read_row(png_ptr, rowData.data(), NULL);
 
             unsigned int rowOffset = i * m_Width;
 
@@ -183,7 +182,7 @@ bool ImageLoaderPNG::ReadData()
 
         for (uint32 i = 0; i < m_Height; i++) {
 
-            png_read_row(png_ptr, rowData, NULL);
+            png_read_row(png_ptr, rowData.data(), NULL);
 
             unsigned int rowOffset = i * m_Width;
 
@@ -210,7 +209,7 @@ bool ImageLoaderPNG::ReadData()
 
         for (uint32 i = 0; i < m_Height; i++) {
 
-            png_read_row(png_ptr, rowData, NULL);
+            png_read_row(png_ptr, rowData.data(), NULL);
 
             unsigned int rowOffset = i * m_Width;
 
@@ -234,7 +233,7 @@ bool ImageLoaderPNG::ReadData()
 
         for (uint32 i = 0; i < m_Height; i++) {
 
-            png_read_row(png_ptr, rowData, NULL);
+            png_read_row(png_ptr, rowData.data(), NULL);
 
             unsigned int rowOffset = i * m_Width;
 
@@ -248,9 +247,7 @@ bool ImageLoaderPNG::ReadData()
         }
         break;
     }
-
     // Cleanup
-    delete[] rowData;
     png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
     return true;
 }
