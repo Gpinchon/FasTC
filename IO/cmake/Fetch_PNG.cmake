@@ -16,6 +16,7 @@ macro(Fetch_PNG)
     execute_process(
       COMMAND ${CMAKE_COMMAND}
         "-DCMAKE_BUILD_TYPE=Release"
+        "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
         -G ${CMAKE_GENERATOR}
         -S ${png_SOURCE_DIR}
         -B ${png_BINARY_DIR}
